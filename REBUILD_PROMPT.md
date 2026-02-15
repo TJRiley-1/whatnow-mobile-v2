@@ -3,6 +3,31 @@
 ## Context
 I'm rebuilding the mobile app for Whatnow (task management for ADHD task paralysis) from Flutter to React Native + Expo. The web version exists at https://github.com/TJRiley-1/Whatnow-com/tree/main/web and uses Supabase backend.
 
+## Supabase Configuration
+
+**Use existing project:** Yes, from Whatnow web app
+**Schema:** Already exists (see supabase-schema.sql in repo)
+**Google OAuth:** [ASK USER - is this configured in your Supabase?]
+
+### Environment Variables (will be added to .env)
+```
+https://jntgomnsvixoroponjcx.supabase.co
+eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpudGdvbW5zdml4b3JvcG9uamN4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk4OTUzMDYsImV4cCI6MjA4NTQ3MTMwNn0.nP6ZmxeOZthqkisBBYXfz8OZrWssuocpLNj5ITs_KIw
+```
+
+### Database Tables (Reference)
+- `profiles`: User data, points, rank (auto-created on signup)
+- `tasks`: social (low/medium/high), energy (low/medium/high), time (minutes)
+- `completed_tasks`: History for analytics
+- `groups` + `group_members`: Leaderboards
+- `weekly_leaderboard`: View for ranking display
+
+### Key Schema Details
+- Social battery: stored as "low" | "medium" | "high"
+- Energy level: stored as "low" | "medium" | "high"
+- Time estimate: integer (minutes)
+- Points: awarded on task completion, stored in completed_tasks table
+
 ## Project Specifications
 
 ### Core Purpose
