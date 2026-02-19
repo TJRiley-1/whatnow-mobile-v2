@@ -1,4 +1,4 @@
-import { View, Text, TouchableOpacity, TextInput, Alert, ScrollView, Modal, ActivityIndicator } from "react-native";
+import { View, Text, TouchableOpacity, TextInput, Alert, ScrollView, Modal, ActivityIndicator, Share } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -97,7 +97,10 @@ export default function GroupsScreen() {
       setShowCreate(false);
       setGroupName("");
       setGroupDesc("");
-      Alert.alert("Group Created!", `Invite code: ${code}\nShare this with friends!`);
+      Alert.alert("Group Created!", `Invite code: ${code}\nShare this with friends!`, [
+        { text: "Share", onPress: () => Share.share({ message: `Join my group on WhatNow! Use invite code: ${code}` }) },
+        { text: "OK", style: "cancel" },
+      ]);
     } catch (err: any) {
       Alert.alert("Error", err.message ?? "Failed to create group");
     } finally {
@@ -249,7 +252,15 @@ function GroupCard({ membership, expanded, onToggle, onLeave, currentUserId }: {
         <View style={{ paddingHorizontal: 16, paddingBottom: 16 }}>
           <View style={{ backgroundColor: "#232850", borderRadius: 12, padding: 12, flexDirection: "row", alignItems: "center", justifyContent: "space-between", marginBottom: 16 }}>
             <Text style={{ color: "#94a3b8", fontSize: 12 }}>Invite Code:</Text>
-            <Text style={{ color: "#f59e0b", fontWeight: "bold", fontSize: 16, letterSpacing: 2 }}>{group.invite_code}</Text>
+            <View style={{ flexDirection: "row", alignItems: "center" }}>
+              <Text style={{ color: "#f59e0b", fontWeight: "bold", fontSize: 16, letterSpacing: 2 }}>{group.invite_code}</Text>
+              <TouchableOpacity
+                style={{ marginLeft: 12, width: 32, height: 32, borderRadius: 16, backgroundColor: "#1a1f3d", alignItems: "center", justifyContent: "center" }}
+                onPress={() => Share.share({ message: `Join my group on WhatNow! Use invite code: ${group.invite_code}` })}
+              >
+                <FontAwesome name="share" size={14} color="#6366f1" />
+              </TouchableOpacity>
+            </View>
           </View>
 
           <Text style={{ color: "#94a3b8", fontSize: 12, fontWeight: "bold", letterSpacing: 1, marginBottom: 8 }}>WEEKLY LEADERBOARD</Text>

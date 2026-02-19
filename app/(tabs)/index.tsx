@@ -83,7 +83,7 @@ export default function HomeScreen() {
           activeOpacity={0.8}
           onPress={() => router.push("/what-next")}
         >
-          <Text className="text-text-primary font-bold text-lg">What Next</Text>
+          <Text className="text-text-primary font-bold text-lg">What Task Now?</Text>
         </TouchableOpacity>
 
         <TouchableOpacity

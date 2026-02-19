@@ -96,7 +96,7 @@ function StateSelection({
         <TouchableOpacity onPress={onBack} className="mr-4">
           <FontAwesome name="arrow-left" size={20} color="#f1f5f9" />
         </TouchableOpacity>
-        <Text className="text-xl font-bold text-text-primary">What Next?</Text>
+        <Text className="text-xl font-bold text-text-primary">What Now?</Text>
       </View>
 
       <ScrollView className="flex-1 px-5" showsVerticalScrollIndicator={false}>
@@ -513,7 +513,7 @@ function SwipeInterface({
             <FontAwesome name="arrow-left" size={20} color="#f1f5f9" />
           </TouchableOpacity>
           <Text className="text-xl font-bold text-text-primary">
-            What Next?
+            What Now?
           </Text>
         </View>
         <Text className="text-text-secondary text-sm">
@@ -614,7 +614,7 @@ function FallbackSuggestions({
         <TouchableOpacity onPress={onBack} className="mr-4">
           <FontAwesome name="arrow-left" size={20} color="#f1f5f9" />
         </TouchableOpacity>
-        <Text className="text-xl font-bold text-text-primary">What Next?</Text>
+        <Text className="text-xl font-bold text-text-primary">What Now?</Text>
       </View>
 
       <ScrollView className="flex-1 px-5" showsVerticalScrollIndicator={false}>

@@ -151,7 +151,7 @@ export default function CelebrationScreen() {
           onPress={() => router.replace("/what-next")}
         >
           <Text style={{ color: "#ffffff", fontWeight: "bold", fontSize: 18, textAlign: "center" }}>
-            What's Next?
+            What Now?
           </Text>
         </TouchableOpacity>
 

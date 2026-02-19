@@ -10,8 +10,8 @@ const FAQ_ITEMS = [
     a: "What Now is a task management app designed for people who struggle with task paralysis and ADHD. Instead of overwhelming you with a long to-do list, it helps you decide what to do next based on your current energy, social battery, and available time.",
   },
   {
-    q: "How does What Next work?",
-    a: "What Next filters your tasks based on how you're feeling right now. Select your available time, energy level, and social battery, then swipe through matching tasks. Swipe right to accept, left to skip. It's like Tinder, but for your to-do list!",
+    q: "How does What Task Now? work?",
+    a: "What Task Now? filters your tasks based on how you're feeling right now. Select your available time, energy level, and social battery, then swipe through matching tasks. Swipe right to accept, left to skip. It's like Tinder, but for your to-do list!",
   },
   {
     q: "How do points work?",
