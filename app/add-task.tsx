@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef } from "react";
 import {
   View,
   Text,
@@ -99,106 +99,34 @@ function formatDate(date: Date): string {
   });
 }
 
-// ─── Component ───────────────────────────────────────────────────────────────
+// ─── Header ──────────────────────────────────────────────────────────────────
 
-export default function AddTaskScreen() {
-  const router = useRouter();
-  const addTask = useAddTask();
+function Header({
+  onBack,
+  onClose,
+}: {
+  onBack: () => void;
+  onClose: () => void;
+}) {
+  return (
+    <View className="flex-row items-center justify-between px-5 pt-4 pb-1">
+      <TouchableOpacity onPress={onBack} className="w-10 h-10 items-center justify-center">
+        <FontAwesome name="arrow-left" size={20} color={COLORS.textPrimary} />
+      </TouchableOpacity>
+      <Text style={{ color: COLORS.textPrimary, fontWeight: "bold", fontSize: 18 }}>
+        Add Task
+      </Text>
+      <TouchableOpacity onPress={onClose} className="w-10 h-10 items-center justify-center">
+        <FontAwesome name="close" size={20} color={COLORS.textSecondary} />
+      </TouchableOpacity>
+    </View>
+  );
+}
 
-  // Step state
-  const [step, setStep] = useState(1);
+// ─── ProgressBar ─────────────────────────────────────────────────────────────
 
-  // Form state
-  const [type, setType] = useState("");
-  const [customType, setCustomType] = useState("");
-  const [showCustomInput, setShowCustomInput] = useState(false);
-  const [time, setTime] = useState(0);
-  const [energy, setEnergy] = useState<EnergyLevel | "">("");
-  const [social, setSocial] = useState<SocialLevel | "">("");
-  const [name, setName] = useState("");
-  const [description, setDescription] = useState("");
-  const [dueDate, setDueDate] = useState<Date | null>(null);
-  const [showDatePicker, setShowDatePicker] = useState(false);
-  const [recurring, setRecurring] = useState("none");
-
-  // Simple date picker state
-  const [dateYear, setDateYear] = useState(new Date().getFullYear());
-  const [dateMonth, setDateMonth] = useState(new Date().getMonth());
-  const [dateDay, setDateDay] = useState(new Date().getDate());
-
-  // Transition animation
-  const fadeAnim = useRef(new Animated.Value(1)).current;
-
-  const animateTransition = (callback: () => void) => {
-    Animated.timing(fadeAnim, {
-      toValue: 0,
-      duration: 120,
-      useNativeDriver: true,
-    }).start(() => {
-      callback();
-      Animated.timing(fadeAnim, {
-        toValue: 1,
-        duration: 180,
-        useNativeDriver: true,
-      }).start();
-    });
-  };
-
-  const goNext = () => {
-    if (step < TOTAL_STEPS) {
-      animateTransition(() => setStep(step + 1));
-    }
-  };
-
-  const goBack = () => {
-    if (step > 1) {
-      animateTransition(() => setStep(step - 1));
-    } else {
-      router.back();
-    }
-  };
-
-  const totalPoints =
-    (time ? getTimePoints(time) : 0) +
-    (energy ? getEnergyPoints(energy as EnergyLevel) : 0) +
-    (social ? getSocialPoints(social as SocialLevel) : 0);
-
-  const handleSubmit = () => {
-    if (!name.trim()) {
-      Alert.alert("Error", "Please enter a task name.");
-      return;
-    }
-    if (!type) {
-      Alert.alert("Error", "Please select a task type.");
-      return;
-    }
-
-    addTask.mutate(
-      {
-        name: name.trim(),
-        description: description.trim() || null,
-        type,
-        time,
-        social: social as SocialLevel,
-        energy: energy as EnergyLevel,
-        due_date: dueDate ? dueDate.toISOString() : null,
-        recurring: recurring === "none" ? null : recurring,
-        local_id: null,
-      },
-      {
-        onSuccess: () => {
-          router.back();
-        },
-        onError: (error) => {
-          Alert.alert("Error", error.message || "Failed to create task.");
-        },
-      }
-    );
-  };
-
-  // ─── Progress Bar ────────────────────────────────────────────────────────
-
-  const ProgressBar = () => (
+function ProgressBar({ step }: { step: number }) {
+  return (
     <View className="px-5 pt-2 pb-4">
       <View className="flex-row items-center mb-2">
         <Text style={{ color: COLORS.textSecondary, fontSize: 13 }}>
@@ -216,26 +144,28 @@ export default function AddTaskScreen() {
       </View>
     </View>
   );
+}
 
-  // ─── Header ──────────────────────────────────────────────────────────────
+// ─── Step 1: Type Selection ──────────────────────────────────────────────────
 
-  const Header = () => (
-    <View className="flex-row items-center justify-between px-5 pt-4 pb-1">
-      <TouchableOpacity onPress={goBack} className="w-10 h-10 items-center justify-center">
-        <FontAwesome name="arrow-left" size={20} color={COLORS.textPrimary} />
-      </TouchableOpacity>
-      <Text style={{ color: COLORS.textPrimary, fontWeight: "bold", fontSize: 18 }}>
-        Add Task
-      </Text>
-      <TouchableOpacity onPress={() => router.back()} className="w-10 h-10 items-center justify-center">
-        <FontAwesome name="close" size={20} color={COLORS.textSecondary} />
-      </TouchableOpacity>
-    </View>
-  );
-
-  // ─── Step 1: Type Selection ──────────────────────────────────────────────
-
-  const StepType = () => (
+function StepType({
+  type,
+  customType,
+  showCustomInput,
+  setType,
+  setCustomType,
+  setShowCustomInput,
+  goNext,
+}: {
+  type: string;
+  customType: string;
+  showCustomInput: boolean;
+  setType: (v: string) => void;
+  setCustomType: (v: string) => void;
+  setShowCustomInput: (v: boolean) => void;
+  goNext: () => void;
+}) {
+  return (
     <ScrollView className="flex-1 px-5" showsVerticalScrollIndicator={false}>
       <Text style={{ color: COLORS.textPrimary, fontWeight: "bold", fontSize: 22, marginBottom: 4 }}>
         What type of task?
@@ -326,10 +256,20 @@ export default function AddTaskScreen() {
       )}
     </ScrollView>
   );
+}
 
-  // ─── Step 2: Time Selection ──────────────────────────────────────────────
+// ─── Step 2: Time Selection ──────────────────────────────────────────────────
 
-  const StepTime = () => (
+function StepTime({
+  time,
+  setTime,
+  goNext,
+}: {
+  time: number;
+  setTime: (v: number) => void;
+  goNext: () => void;
+}) {
+  return (
     <View className="flex-1 px-5 justify-center">
       <Text style={{ color: COLORS.textPrimary, fontWeight: "bold", fontSize: 22, marginBottom: 4 }}>
         How long will it take?
@@ -368,10 +308,20 @@ export default function AddTaskScreen() {
       ))}
     </View>
   );
+}
 
-  // ─── Step 3: Energy Level ────────────────────────────────────────────────
+// ─── Step 3: Energy Level ────────────────────────────────────────────────────
 
-  const StepEnergy = () => (
+function StepEnergy({
+  energy,
+  setEnergy,
+  goNext,
+}: {
+  energy: EnergyLevel | "";
+  setEnergy: (v: EnergyLevel) => void;
+  goNext: () => void;
+}) {
+  return (
     <View className="flex-1 px-5 justify-center">
       <Text style={{ color: COLORS.textPrimary, fontWeight: "bold", fontSize: 22, marginBottom: 4 }}>
         Energy level needed?
@@ -412,10 +362,20 @@ export default function AddTaskScreen() {
       ))}
     </View>
   );
+}
 
-  // ─── Step 4: Social Battery ──────────────────────────────────────────────
+// ─── Step 4: Social Battery ──────────────────────────────────────────────────
 
-  const StepSocial = () => (
+function StepSocial({
+  social,
+  setSocial,
+  goNext,
+}: {
+  social: SocialLevel | "";
+  setSocial: (v: SocialLevel) => void;
+  goNext: () => void;
+}) {
+  return (
     <View className="flex-1 px-5 justify-center">
       <Text style={{ color: COLORS.textPrimary, fontWeight: "bold", fontSize: 22, marginBottom: 4 }}>
         Social battery needed?
@@ -456,10 +416,24 @@ export default function AddTaskScreen() {
       ))}
     </View>
   );
+}
 
-  // ─── Step 5: Details ─────────────────────────────────────────────────────
+// ─── Step 5: Details ─────────────────────────────────────────────────────────
 
-  const StepDetails = () => (
+function StepDetails({
+  name,
+  description,
+  setName,
+  setDescription,
+  goNext,
+}: {
+  name: string;
+  description: string;
+  setName: (v: string) => void;
+  setDescription: (v: string) => void;
+  goNext: () => void;
+}) {
+  return (
     <View className="flex-1 px-5">
       <Text style={{ color: COLORS.textPrimary, fontWeight: "bold", fontSize: 22, marginBottom: 4, marginTop: 8 }}>
         Task details
@@ -484,7 +458,6 @@ export default function AddTaskScreen() {
         placeholderTextColor="#64748b"
         value={name}
         onChangeText={setName}
-        autoFocus
       />
 
       <Text style={{ color: COLORS.textSecondary, fontSize: 13, marginBottom: 6 }}>
@@ -525,154 +498,262 @@ export default function AddTaskScreen() {
       </TouchableOpacity>
     </View>
   );
+}
 
-  // ─── Step 6: Schedule ────────────────────────────────────────────────────
+// ─── Step 6: Schedule ────────────────────────────────────────────────────────
 
-  const StepSchedule = () => {
-    const quickDates = [
-      { label: "Today", date: new Date() },
-      {
-        label: "Tomorrow",
-        date: (() => {
-          const d = new Date();
-          d.setDate(d.getDate() + 1);
-          return d;
-        })(),
-      },
-      {
-        label: "Next Week",
-        date: (() => {
-          const d = new Date();
-          d.setDate(d.getDate() + 7);
-          return d;
-        })(),
-      },
-    ];
+function StepSchedule({
+  dueDate,
+  setDueDate,
+  recurring,
+  setRecurring,
+  totalPoints,
+  isPending,
+  onSubmit,
+}: {
+  dueDate: Date | null;
+  setDueDate: (v: Date | null) => void;
+  recurring: string;
+  setRecurring: (v: string) => void;
+  totalPoints: number;
+  isPending: boolean;
+  onSubmit: () => void;
+}) {
+  const quickDates = [
+    { label: "Today", date: new Date() },
+    {
+      label: "Tomorrow",
+      date: (() => {
+        const d = new Date();
+        d.setDate(d.getDate() + 1);
+        return d;
+      })(),
+    },
+    {
+      label: "Next Week",
+      date: (() => {
+        const d = new Date();
+        d.setDate(d.getDate() + 7);
+        return d;
+      })(),
+    },
+  ];
 
-    return (
-      <ScrollView className="flex-1 px-5" showsVerticalScrollIndicator={false}>
-        <Text style={{ color: COLORS.textPrimary, fontWeight: "bold", fontSize: 22, marginBottom: 4, marginTop: 8 }}>
-          Schedule (optional)
-        </Text>
-        <Text style={{ color: COLORS.textSecondary, fontSize: 14, marginBottom: 20 }}>
-          Set a due date and recurring schedule
-        </Text>
+  return (
+    <ScrollView className="flex-1 px-5" showsVerticalScrollIndicator={false}>
+      <Text style={{ color: COLORS.textPrimary, fontWeight: "bold", fontSize: 22, marginBottom: 4, marginTop: 8 }}>
+        Schedule (optional)
+      </Text>
+      <Text style={{ color: COLORS.textSecondary, fontSize: 14, marginBottom: 20 }}>
+        Set a due date and recurring schedule
+      </Text>
 
-        {/* Due Date */}
-        <Text style={{ color: COLORS.textSecondary, fontSize: 13, marginBottom: 8 }}>
-          Due Date
-        </Text>
+      {/* Due Date */}
+      <Text style={{ color: COLORS.textSecondary, fontSize: 13, marginBottom: 8 }}>
+        Due Date
+      </Text>
 
-        <View className="flex-row mb-3" style={{ gap: 8 }}>
-          {quickDates.map((qd) => (
-            <TouchableOpacity
-              key={qd.label}
-              className="rounded-xl py-3 px-4 flex-1 items-center"
+      <View className="flex-row mb-3" style={{ gap: 8 }}>
+        {quickDates.map((qd) => (
+          <TouchableOpacity
+            key={qd.label}
+            className="rounded-xl py-3 px-4 flex-1 items-center"
+            style={{
+              backgroundColor:
+                dueDate && dueDate.toDateString() === qd.date.toDateString()
+                  ? COLORS.primary
+                  : COLORS.bgCard,
+            }}
+            activeOpacity={0.7}
+            onPress={() => setDueDate(qd.date)}
+          >
+            <Text
               style={{
-                backgroundColor:
+                color:
                   dueDate && dueDate.toDateString() === qd.date.toDateString()
-                    ? COLORS.primary
-                    : COLORS.bgCard,
+                    ? "#ffffff"
+                    : COLORS.textPrimary,
+                fontWeight: "600",
+                fontSize: 14,
               }}
-              activeOpacity={0.7}
-              onPress={() => setDueDate(qd.date)}
             >
-              <Text
-                style={{
-                  color:
-                    dueDate && dueDate.toDateString() === qd.date.toDateString()
-                      ? "#ffffff"
-                      : COLORS.textPrimary,
-                  fontWeight: "600",
-                  fontSize: 14,
-                }}
-              >
-                {qd.label}
-              </Text>
-            </TouchableOpacity>
-          ))}
-        </View>
-
-        {dueDate && (
-          <View className="flex-row items-center justify-between rounded-xl px-4 py-3 mb-3" style={{ backgroundColor: COLORS.bgCard }}>
-            <Text style={{ color: COLORS.textPrimary, fontSize: 15 }}>
-              {formatDate(dueDate)}
+              {qd.label}
             </Text>
-            <TouchableOpacity onPress={() => setDueDate(null)}>
-              <Text style={{ color: COLORS.textSecondary, fontSize: 13 }}>Clear</Text>
-            </TouchableOpacity>
+          </TouchableOpacity>
+        ))}
+      </View>
+
+      {dueDate && (
+        <View className="flex-row items-center justify-between rounded-xl px-4 py-3 mb-3" style={{ backgroundColor: COLORS.bgCard }}>
+          <Text style={{ color: COLORS.textPrimary, fontSize: 15 }}>
+            {formatDate(dueDate)}
+          </Text>
+          <TouchableOpacity onPress={() => setDueDate(null)}>
+            <Text style={{ color: COLORS.textSecondary, fontSize: 13 }}>Clear</Text>
+          </TouchableOpacity>
+        </View>
+      )}
+
+      {/* Recurring */}
+      <Text style={{ color: COLORS.textSecondary, fontSize: 13, marginBottom: 8, marginTop: 12 }}>
+        Repeat
+      </Text>
+      <View className="flex-row flex-wrap" style={{ gap: 8 }}>
+        {RECURRING_OPTIONS.map((r) => (
+          <TouchableOpacity
+            key={r.value}
+            className="rounded-xl py-3 px-5 items-center"
+            style={{
+              backgroundColor: recurring === r.value ? COLORS.primary : COLORS.bgCard,
+            }}
+            activeOpacity={0.7}
+            onPress={() => setRecurring(r.value)}
+          >
+            <Text
+              style={{
+                color: recurring === r.value ? "#ffffff" : COLORS.textPrimary,
+                fontWeight: "600",
+                fontSize: 14,
+              }}
+            >
+              {r.label}
+            </Text>
+          </TouchableOpacity>
+        ))}
+      </View>
+
+      {/* Points Summary */}
+      <View
+        className="rounded-2xl p-5 mt-8 items-center"
+        style={{ backgroundColor: COLORS.bgCard, borderWidth: 1, borderColor: COLORS.accent + "33" }}
+      >
+        <Text style={{ color: COLORS.textSecondary, fontSize: 14, marginBottom: 4 }}>
+          Total Points
+        </Text>
+        <Text style={{ color: COLORS.accent, fontWeight: "bold", fontSize: 36 }}>
+          {totalPoints}
+        </Text>
+        <Text style={{ color: COLORS.textSecondary, fontSize: 12, marginTop: 2 }}>
+          points per completion
+        </Text>
+      </View>
+
+      {/* Submit */}
+      <TouchableOpacity
+        className="rounded-2xl py-4 items-center mt-6 mb-10"
+        style={{
+          backgroundColor: COLORS.primary,
+          opacity: isPending ? 0.6 : 1,
+        }}
+        activeOpacity={0.8}
+        disabled={isPending}
+        onPress={onSubmit}
+      >
+        {isPending ? (
+          <Text style={{ color: "#ffffff", fontWeight: "bold", fontSize: 18 }}>
+            Creating...
+          </Text>
+        ) : (
+          <View className="flex-row items-center">
+            <FontAwesome name="check" size={18} color="#ffffff" />
+            <Text style={{ color: "#ffffff", fontWeight: "bold", fontSize: 18, marginLeft: 10 }}>
+              Create Task
+            </Text>
           </View>
         )}
+      </TouchableOpacity>
+    </ScrollView>
+  );
+}
 
-        {/* Recurring */}
-        <Text style={{ color: COLORS.textSecondary, fontSize: 13, marginBottom: 8, marginTop: 12 }}>
-          Repeat
-        </Text>
-        <View className="flex-row flex-wrap" style={{ gap: 8 }}>
-          {RECURRING_OPTIONS.map((r) => (
-            <TouchableOpacity
-              key={r.value}
-              className="rounded-xl py-3 px-5 items-center"
-              style={{
-                backgroundColor: recurring === r.value ? COLORS.primary : COLORS.bgCard,
-              }}
-              activeOpacity={0.7}
-              onPress={() => setRecurring(r.value)}
-            >
-              <Text
-                style={{
-                  color: recurring === r.value ? "#ffffff" : COLORS.textPrimary,
-                  fontWeight: "600",
-                  fontSize: 14,
-                }}
-              >
-                {r.label}
-              </Text>
-            </TouchableOpacity>
-          ))}
-        </View>
+// ─── Component ───────────────────────────────────────────────────────────────
 
-        {/* Points Summary */}
-        <View
-          className="rounded-2xl p-5 mt-8 items-center"
-          style={{ backgroundColor: COLORS.bgCard, borderWidth: 1, borderColor: COLORS.accent + "33" }}
-        >
-          <Text style={{ color: COLORS.textSecondary, fontSize: 14, marginBottom: 4 }}>
-            Total Points
-          </Text>
-          <Text style={{ color: COLORS.accent, fontWeight: "bold", fontSize: 36 }}>
-            {totalPoints}
-          </Text>
-          <Text style={{ color: COLORS.textSecondary, fontSize: 12, marginTop: 2 }}>
-            points per completion
-          </Text>
-        </View>
+export default function AddTaskScreen() {
+  const router = useRouter();
+  const addTask = useAddTask();
 
-        {/* Submit */}
-        <TouchableOpacity
-          className="rounded-2xl py-4 items-center mt-6 mb-10"
-          style={{
-            backgroundColor: COLORS.primary,
-            opacity: addTask.isPending ? 0.6 : 1,
-          }}
-          activeOpacity={0.8}
-          disabled={addTask.isPending}
-          onPress={handleSubmit}
-        >
-          {addTask.isPending ? (
-            <Text style={{ color: "#ffffff", fontWeight: "bold", fontSize: 18 }}>
-              Creating...
-            </Text>
-          ) : (
-            <View className="flex-row items-center">
-              <FontAwesome name="check" size={18} color="#ffffff" />
-              <Text style={{ color: "#ffffff", fontWeight: "bold", fontSize: 18, marginLeft: 10 }}>
-                Create Task
-              </Text>
-            </View>
-          )}
-        </TouchableOpacity>
-      </ScrollView>
+  // Step state
+  const [step, setStep] = useState(1);
+
+  // Form state
+  const [type, setType] = useState("");
+  const [customType, setCustomType] = useState("");
+  const [showCustomInput, setShowCustomInput] = useState(false);
+  const [time, setTime] = useState(0);
+  const [energy, setEnergy] = useState<EnergyLevel | "">("");
+  const [social, setSocial] = useState<SocialLevel | "">("");
+  const [name, setName] = useState("");
+  const [description, setDescription] = useState("");
+  const [dueDate, setDueDate] = useState<Date | null>(null);
+  const [recurring, setRecurring] = useState("none");
+
+  // Transition animation
+  const fadeAnim = useRef(new Animated.Value(1)).current;
+
+  const animateTransition = (callback: () => void) => {
+    Animated.timing(fadeAnim, {
+      toValue: 0,
+      duration: 120,
+      useNativeDriver: true,
+    }).start(() => {
+      callback();
+      Animated.timing(fadeAnim, {
+        toValue: 1,
+        duration: 180,
+        useNativeDriver: true,
+      }).start();
+    });
+  };
+
+  const goNext = () => {
+    if (step < TOTAL_STEPS) {
+      animateTransition(() => setStep(step + 1));
+    }
+  };
+
+  const goBack = () => {
+    if (step > 1) {
+      animateTransition(() => setStep(step - 1));
+    } else {
+      router.back();
+    }
+  };
+
+  const totalPoints =
+    (time ? getTimePoints(time) : 0) +
+    (energy ? getEnergyPoints(energy as EnergyLevel) : 0) +
+    (social ? getSocialPoints(social as SocialLevel) : 0);
+
+  const handleSubmit = () => {
+    if (!name.trim()) {
+      Alert.alert("Error", "Please enter a task name.");
+      return;
+    }
+    if (!type) {
+      Alert.alert("Error", "Please select a task type.");
+      return;
+    }
+
+    addTask.mutate(
+      {
+        name: name.trim(),
+        description: description.trim() || null,
+        type,
+        time,
+        social: social as SocialLevel,
+        energy: energy as EnergyLevel,
+        due_date: dueDate ? dueDate.toISOString() : null,
+        recurring: recurring === "none" ? null : recurring,
+        local_id: null,
+      },
+      {
+        onSuccess: () => {
+          router.back();
+        },
+        onError: (error) => {
+          Alert.alert("Error", error.message || "Failed to create task.");
+        },
+      }
     );
   };
 
@@ -681,17 +762,45 @@ export default function AddTaskScreen() {
   const renderStep = () => {
     switch (step) {
       case 1:
-        return <StepType />;
+        return (
+          <StepType
+            type={type}
+            customType={customType}
+            showCustomInput={showCustomInput}
+            setType={setType}
+            setCustomType={setCustomType}
+            setShowCustomInput={setShowCustomInput}
+            goNext={goNext}
+          />
+        );
       case 2:
-        return <StepTime />;
+        return <StepTime time={time} setTime={setTime} goNext={goNext} />;
       case 3:
-        return <StepEnergy />;
+        return <StepEnergy energy={energy} setEnergy={setEnergy} goNext={goNext} />;
       case 4:
-        return <StepSocial />;
+        return <StepSocial social={social} setSocial={setSocial} goNext={goNext} />;
       case 5:
-        return <StepDetails />;
+        return (
+          <StepDetails
+            name={name}
+            description={description}
+            setName={setName}
+            setDescription={setDescription}
+            goNext={goNext}
+          />
+        );
       case 6:
-        return <StepSchedule />;
+        return (
+          <StepSchedule
+            dueDate={dueDate}
+            setDueDate={setDueDate}
+            recurring={recurring}
+            setRecurring={setRecurring}
+            totalPoints={totalPoints}
+            isPending={addTask.isPending}
+            onSubmit={handleSubmit}
+          />
+        );
       default:
         return null;
     }
@@ -699,8 +808,8 @@ export default function AddTaskScreen() {
 
   return (
     <SafeAreaView className="flex-1" style={{ backgroundColor: COLORS.bgPrimary }}>
-      <Header />
-      <ProgressBar />
+      <Header onBack={goBack} onClose={() => router.back()} />
+      <ProgressBar step={step} />
       <Animated.View style={{ flex: 1, opacity: fadeAnim }}>
         {renderStep()}
       </Animated.View>

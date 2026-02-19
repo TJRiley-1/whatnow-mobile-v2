@@ -98,29 +98,37 @@ function SwipeableTaskCard({
   task,
   onPress,
   onDelete,
+  onStart,
 }: {
   task: Task;
   onPress: () => void;
   onDelete: () => void;
+  onStart: () => void;
 }) {
   const translateX = useRef(new Animated.Value(0)).current;
   const panStartX = useRef(0);
   const currentOffset = useRef(0);
+  const isSwiping = useRef(false);
 
   const points = calculatePoints(task.time, task.social, task.energy);
   const color = typeColor(task.type);
 
   const onTouchStart = (e: any) => {
     panStartX.current = e.nativeEvent.pageX;
+    isSwiping.current = false;
   };
 
   const onTouchMove = (e: any) => {
     const dx = e.nativeEvent.pageX - panStartX.current;
+    // Only start swiping after a 10px horizontal threshold
+    if (!isSwiping.current && Math.abs(dx) < 10) return;
+    isSwiping.current = true;
     const next = Math.max(Math.min(currentOffset.current + dx, 0), -120);
     translateX.setValue(next);
   };
 
   const onTouchEnd = (e: any) => {
+    if (!isSwiping.current) return;
     const dx = e.nativeEvent.pageX - panStartX.current;
     const final = currentOffset.current + dx;
 
@@ -320,21 +328,41 @@ function SwipeableTaskCard({
 
           {/* Stats row */}
           <View
-            className="flex-row items-center gap-4 pt-2 mt-1"
+            className="flex-row items-center justify-between pt-2 mt-1"
             style={{ borderTopWidth: 1, borderTopColor: THEME.borderSubtle }}
           >
-            <Text style={{ color: THEME.textSecondary, fontSize: 11 }}>
-              <Text style={{ fontWeight: "600" }}>{task.times_shown}</Text>{" "}
-              shown
-            </Text>
-            <Text style={{ color: THEME.textSecondary, fontSize: 11 }}>
-              <Text style={{ fontWeight: "600" }}>{task.times_skipped}</Text>{" "}
-              skipped
-            </Text>
-            <Text style={{ color: THEME.textSecondary, fontSize: 11 }}>
-              <Text style={{ fontWeight: "600" }}>{task.times_completed}</Text>{" "}
-              done
-            </Text>
+            <View className="flex-row items-center gap-4">
+              <Text style={{ color: THEME.textSecondary, fontSize: 11 }}>
+                <Text style={{ fontWeight: "600" }}>{task.times_shown}</Text>{" "}
+                shown
+              </Text>
+              <Text style={{ color: THEME.textSecondary, fontSize: 11 }}>
+                <Text style={{ fontWeight: "600" }}>{task.times_skipped}</Text>{" "}
+                skipped
+              </Text>
+              <Text style={{ color: THEME.textSecondary, fontSize: 11 }}>
+                <Text style={{ fontWeight: "600" }}>{task.times_completed}</Text>{" "}
+                done
+              </Text>
+            </View>
+            <View className="flex-row items-center gap-2">
+              <TouchableOpacity
+                onPress={onStart}
+                className="w-8 h-8 rounded-full items-center justify-center"
+                style={{ backgroundColor: "#22c55e22" }}
+                hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+              >
+                <FontAwesome name="play" size={12} color="#22c55e" />
+              </TouchableOpacity>
+              <TouchableOpacity
+                onPress={onDelete}
+                className="w-8 h-8 rounded-full items-center justify-center"
+                style={{ backgroundColor: "#ef444422" }}
+                hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+              >
+                <FontAwesome name="trash" size={12} color="#ef4444" />
+              </TouchableOpacity>
+            </View>
           </View>
         </TouchableOpacity>
       </Animated.View>
@@ -883,15 +911,32 @@ export default function ManageTasksScreen() {
   );
 
   // ---- render helpers ----
+  const handleStart = useCallback(
+    (task: Task) => {
+      const points = calculatePoints(task.time, task.social, task.energy);
+      router.push({
+        pathname: "/timer",
+        params: {
+          taskId: task.id,
+          taskName: task.name,
+          taskTime: task.time,
+          points,
+        },
+      });
+    },
+    [router]
+  );
+
   const renderTask = useCallback(
     ({ item }: { item: Task }) => (
       <SwipeableTaskCard
         task={item}
         onPress={() => setEditingTask(item)}
         onDelete={() => confirmDelete(item)}
+        onStart={() => handleStart(item)}
       />
     ),
-    [confirmDelete]
+    [confirmDelete, handleStart]
   );
 
   const keyExtractor = useCallback((item: Task) => item.id, []);
@@ -948,11 +993,25 @@ export default function ManageTasksScreen() {
           </Text>
         </View>
         <View className="flex-row items-center gap-3">
-          <TouchableOpacity onPress={() => setShowSort((v) => !v)}>
-            <FontAwesome name="sort" size={20} color={THEME.textSecondary} />
+          <TouchableOpacity
+            onPress={() => setShowSort((v) => !v)}
+            className="flex-row items-center px-3 py-1.5 rounded-lg"
+            style={{ backgroundColor: THEME.bgCard }}
+          >
+            <FontAwesome name="sort-amount-desc" size={14} color={THEME.textSecondary} />
+            <Text style={{ color: THEME.textSecondary, fontSize: 13, fontWeight: "600", marginLeft: 6 }}>
+              Sort
+            </Text>
           </TouchableOpacity>
-          <TouchableOpacity onPress={() => router.push("/add-task")}>
-            <FontAwesome name="plus-circle" size={24} color={THEME.primary} />
+          <TouchableOpacity
+            onPress={() => router.push("/add-task")}
+            className="flex-row items-center px-3 py-1.5 rounded-lg"
+            style={{ backgroundColor: THEME.primary }}
+          >
+            <FontAwesome name="plus" size={14} color="#ffffff" />
+            <Text style={{ color: "#ffffff", fontSize: 13, fontWeight: "600", marginLeft: 6 }}>
+              Add
+            </Text>
           </TouchableOpacity>
         </View>
       </View>
@@ -999,42 +1058,45 @@ export default function ManageTasksScreen() {
       )}
 
       {/* Filter tabs */}
-      <ScrollView
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        className="px-4 py-2"
-        contentContainerStyle={{ gap: 8 }}
-      >
-        {FILTER_TABS.map((tab) => {
-          const active = activeFilter === tab;
-          const tabColor =
-            tab === "All"
-              ? THEME.primary
-              : typeColor(tab.toLowerCase());
-          return (
-            <TouchableOpacity
-              key={tab}
-              onPress={() => setActiveFilter(tab)}
-              className="px-4 py-1.5 rounded-full"
-              style={{
-                backgroundColor: active ? tabColor + "33" : THEME.bgCard,
-                borderWidth: 1,
-                borderColor: active ? tabColor : THEME.borderSubtle,
-              }}
-            >
-              <Text
+      <View style={{ height: 44 }}>
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          className="px-4"
+          contentContainerStyle={{ gap: 8, alignItems: "center", height: 44 }}
+        >
+          {FILTER_TABS.map((tab) => {
+            const active = activeFilter === tab;
+            const tabColor =
+              tab === "All"
+                ? THEME.primary
+                : typeColor(tab.toLowerCase());
+            return (
+              <TouchableOpacity
+                key={tab}
+                onPress={() => setActiveFilter(tab)}
+                className="px-4 rounded-full items-center justify-center"
                 style={{
-                  color: active ? tabColor : THEME.textSecondary,
-                  fontSize: 13,
-                  fontWeight: active ? "600" : "400",
+                  height: 32,
+                  backgroundColor: active ? tabColor + "33" : THEME.bgCard,
+                  borderWidth: 1,
+                  borderColor: active ? tabColor : THEME.borderSubtle,
                 }}
               >
-                {tab}
-              </Text>
-            </TouchableOpacity>
-          );
-        })}
-      </ScrollView>
+                <Text
+                  style={{
+                    color: active ? tabColor : THEME.textSecondary,
+                    fontSize: 13,
+                    fontWeight: active ? "600" : "400",
+                  }}
+                >
+                  {tab}
+                </Text>
+              </TouchableOpacity>
+            );
+          })}
+        </ScrollView>
+      </View>
 
       {/* Search bar */}
       <View className="mx-4 my-2">

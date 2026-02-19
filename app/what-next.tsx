@@ -76,7 +76,7 @@ function StateSelection({
   onSubmit,
   onBack,
 }: {
-  onSubmit: (time: number, energy: EnergyLevel, social: SocialLevel) => void;
+  onSubmit: (time: number | null, energy: EnergyLevel | null, social: SocialLevel | null) => void;
   onBack: () => void;
 }) {
   const [selectedTime, setSelectedTime] = useState<number | null>(null);
@@ -88,7 +88,7 @@ function StateSelection({
   );
 
   const canSubmit =
-    selectedTime !== null && selectedEnergy !== null && selectedSocial !== null;
+    selectedTime !== null || selectedEnergy !== null || selectedSocial !== null;
 
   return (
     <SafeAreaView className="flex-1 bg-bg-primary">
@@ -112,7 +112,7 @@ function StateSelection({
             {TIME_OPTIONS.map((time) => (
               <TouchableOpacity
                 key={time}
-                onPress={() => setSelectedTime(time)}
+                onPress={() => setSelectedTime(prev => prev === time ? null : time)}
                 className={`flex-1 min-w-[70px] items-center py-3 rounded-xl ${
                   selectedTime === time ? "bg-primary" : "bg-bg-card"
                 }`}
@@ -143,7 +143,7 @@ function StateSelection({
             {LEVEL_OPTIONS.map((level) => (
               <TouchableOpacity
                 key={level}
-                onPress={() => setSelectedEnergy(level)}
+                onPress={() => setSelectedEnergy(prev => prev === level ? null : level)}
                 className={`flex-1 items-center py-3 rounded-xl ${
                   selectedEnergy === level ? "bg-primary" : "bg-bg-card"
                 }`}
@@ -174,7 +174,7 @@ function StateSelection({
             {LEVEL_OPTIONS.map((level) => (
               <TouchableOpacity
                 key={level}
-                onPress={() => setSelectedSocial(level)}
+                onPress={() => setSelectedSocial(prev => prev === level ? null : level)}
                 className={`flex-1 items-center py-3 rounded-xl ${
                   selectedSocial === level ? "bg-primary" : "bg-bg-card"
                 }`}
@@ -197,7 +197,7 @@ function StateSelection({
         <TouchableOpacity
           onPress={() => {
             if (canSubmit) {
-              onSubmit(selectedTime!, selectedEnergy!, selectedSocial!);
+              onSubmit(selectedTime, selectedEnergy, selectedSocial);
             }
           }}
           className={`mt-8 mb-6 py-4 rounded-xl items-center ${
@@ -679,22 +679,22 @@ export default function WhatNextScreen() {
   const { data: allTasks, isLoading } = useTasks();
 
   const [phase, setPhase] = useState<"selection" | "swipe">("selection");
-  const [selectedTime, setSelectedTime] = useState<number>(30);
-  const [selectedEnergy, setSelectedEnergy] = useState<EnergyLevel>("medium");
-  const [selectedSocial, setSelectedSocial] = useState<SocialLevel>("medium");
+  const [selectedTime, setSelectedTime] = useState<number | null>(null);
+  const [selectedEnergy, setSelectedEnergy] = useState<EnergyLevel | null>(null);
+  const [selectedSocial, setSelectedSocial] = useState<SocialLevel | null>(null);
 
   const filteredTasks = useMemo(() => {
     if (!allTasks) return [];
 
-    const maxEnergy = LEVEL_ORDER[selectedEnergy];
-    const maxSocial = LEVEL_ORDER[selectedSocial];
+    const maxEnergy = selectedEnergy ? LEVEL_ORDER[selectedEnergy] : null;
+    const maxSocial = selectedSocial ? LEVEL_ORDER[selectedSocial] : null;
 
     return allTasks
       .filter(
         (task) =>
-          task.time <= selectedTime &&
-          LEVEL_ORDER[task.energy] <= maxEnergy &&
-          LEVEL_ORDER[task.social] <= maxSocial
+          (selectedTime === null || task.time <= selectedTime) &&
+          (maxEnergy === null || LEVEL_ORDER[task.energy] <= maxEnergy) &&
+          (maxSocial === null || LEVEL_ORDER[task.social] <= maxSocial)
       )
       .sort((a, b) => {
         // Most skipped first
@@ -707,7 +707,7 @@ export default function WhatNextScreen() {
   }, [allTasks, selectedTime, selectedEnergy, selectedSocial]);
 
   const handleSubmit = useCallback(
-    (time: number, energy: EnergyLevel, social: SocialLevel) => {
+    (time: number | null, energy: EnergyLevel | null, social: SocialLevel | null) => {
       setSelectedTime(time);
       setSelectedEnergy(energy);
       setSelectedSocial(social);

@@ -70,7 +70,7 @@ export default function TimerScreen() {
     setIsRunning(false);
 
     const actualSecondsElapsed = totalSeconds - remainingSeconds;
-    const actualMinutesElapsed = Math.round((actualSecondsElapsed / 60) * 100) / 100;
+    const actualMinutesElapsed = Math.max(1, Math.ceil(actualSecondsElapsed / 60));
 
     const task = tasks?.find((t) => t.id === taskId);
     if (task) {

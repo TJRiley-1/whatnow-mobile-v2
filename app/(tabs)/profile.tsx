@@ -99,9 +99,8 @@ export default function ProfileScreen() {
         <TouchableOpacity
           className="bg-bg-card rounded-2xl py-4 px-5 mb-3"
           onPress={() => router.push("/help")}
-          style={{ borderWidth: 1, borderColor: "#6366f1" }}
         >
-          <Text style={{ color: "#6366f1", fontWeight: "600", fontSize: 16, textAlign: "center" }}>
+          <Text style={{ color: "#f1f5f9", fontWeight: "600", fontSize: 16, textAlign: "center" }}>
             Help & FAQ
           </Text>
         </TouchableOpacity>
