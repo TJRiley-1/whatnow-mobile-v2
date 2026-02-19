@@ -411,14 +411,14 @@ function EditTaskModal({
   if (!task) return null;
 
   const typeOptions = [
-    "chores",
-    "work",
-    "health",
-    "admin",
-    "errand",
-    "self-care",
-    "creative",
-    "social",
+    "Chores",
+    "Work",
+    "Health",
+    "Admin",
+    "Errand",
+    "Self-care",
+    "Creative",
+    "Social",
   ];
 
   const handleSave = () => {
