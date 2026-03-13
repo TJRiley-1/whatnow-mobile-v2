@@ -22,7 +22,7 @@ class ProfileScreen extends ConsumerWidget {
           if (profile == null) {
             return const Center(child: Text('Profile not found'));
           }
-          return Padding(
+          return SingleChildScrollView(
             padding: const EdgeInsets.all(24),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -47,12 +47,47 @@ class ProfileScreen extends ConsumerWidget {
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 8),
-                Text(
-                  profile.currentRank,
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: Theme.of(context).colorScheme.primary,
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      profile.currentRank,
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                            color: Theme.of(context).colorScheme.primary,
+                          ),
+                    ),
+                    if (profile.isPremium) ...[
+                      const SizedBox(width: 8),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 8, vertical: 2),
+                        decoration: BoxDecoration(
+                          color: Theme.of(context).colorScheme.primaryContainer,
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(Icons.workspace_premium,
+                                size: 14,
+                                color: Theme.of(context)
+                                    .colorScheme
+                                    .onPrimaryContainer),
+                            const SizedBox(width: 4),
+                            Text('Premium',
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .bodySmall
+                                    ?.copyWith(
+                                      color: Theme.of(context)
+                                          .colorScheme
+                                          .onPrimaryContainer,
+                                    )),
+                          ],
+                        ),
                       ),
-                  textAlign: TextAlign.center,
+                    ],
+                  ],
                 ),
                 const SizedBox(height: 24),
                 Card(
@@ -121,7 +156,18 @@ class ProfileScreen extends ConsumerWidget {
                     minimumSize: const Size(double.infinity, 52),
                   ),
                 ),
-                const Spacer(),
+                if (!profile.isPremium) ...[
+                  const SizedBox(height: 12),
+                  FilledButton.icon(
+                    onPressed: () => context.push('/premium'),
+                    icon: const Icon(Icons.workspace_premium),
+                    label: const Text('Upgrade to Premium'),
+                    style: FilledButton.styleFrom(
+                      minimumSize: const Size(double.infinity, 52),
+                    ),
+                  ),
+                ],
+                const SizedBox(height: 32),
                 AppButton(
                   label: 'Sign Out',
                   onPressed: () async {

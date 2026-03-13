@@ -1,15 +1,31 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import '../../providers/connectivity_provider.dart';
 
-class HomeShell extends StatelessWidget {
+class HomeShell extends ConsumerWidget {
   final StatefulNavigationShell navigationShell;
 
   const HomeShell({super.key, required this.navigationShell});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final isOnline = ref.watch(connectivityProvider).valueOrNull ?? true;
+
     return Scaffold(
-      body: navigationShell,
+      body: Column(
+        children: [
+          if (!isOnline)
+            MaterialBanner(
+              content: const Text('You are offline. Changes will sync when reconnected.'),
+              leading: const Icon(Icons.cloud_off),
+              backgroundColor: Theme.of(context).colorScheme.errorContainer,
+              actions: const [SizedBox.shrink()],
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            ),
+          Expanded(child: navigationShell),
+        ],
+      ),
       bottomNavigationBar: NavigationBar(
         selectedIndex: navigationShell.currentIndex,
         onDestinationSelected: (index) {

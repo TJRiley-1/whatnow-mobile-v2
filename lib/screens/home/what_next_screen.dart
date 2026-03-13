@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../../models/task.dart';
 import '../../providers/filter_provider.dart';
 import '../../providers/task_provider.dart';
+import '../../widgets/banner_ad_widget.dart';
 import '../../widgets/swipe_card.dart';
 
 class WhatNextScreen extends ConsumerStatefulWidget {
@@ -89,7 +90,10 @@ class _WhatNextScreenState extends ConsumerState<WhatNextScreen> {
           ),
         ],
       ),
-      body: tasksAsync.when(
+      body: Column(
+        children: [
+          const BannerAdWidget(),
+          Expanded(child: tasksAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (error, _) => Center(child: Text('Error: $error')),
         data: (tasks) {
@@ -203,6 +207,8 @@ class _WhatNextScreenState extends ConsumerState<WhatNextScreen> {
             ),
           );
         },
+      )),
+        ],
       ),
     );
   }

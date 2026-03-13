@@ -2,6 +2,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../models/task.dart';
 import 'auth_provider.dart';
+import 'connectivity_provider.dart';
+import 'sync_provider.dart';
 
 final taskListProvider =
     AsyncNotifierProvider<TaskListNotifier, List<Task>>(TaskListNotifier.new);
@@ -9,18 +11,33 @@ final taskListProvider =
 class TaskListNotifier extends AsyncNotifier<List<Task>> {
   SupabaseClient get _client => Supabase.instance.client;
 
+  bool get _isOnline =>
+      ref.read(connectivityProvider).valueOrNull ?? true;
+
+  SyncService get _sync => ref.read(syncProvider);
+
   @override
   Future<List<Task>> build() async {
     final user = ref.watch(currentUserProvider);
     if (user == null) return [];
 
-    final data = await _client
-        .from('tasks')
-        .select()
-        .eq('user_id', user.id)
-        .order('created_at', ascending: false);
+    if (_isOnline) {
+      try {
+        final data = await _client
+            .from('tasks')
+            .select()
+            .eq('user_id', user.id)
+            .order('created_at', ascending: false);
 
-    return data.map((json) => Task.fromJson(json)).toList();
+        final tasks = data.map((json) => Task.fromJson(json)).toList();
+        await _sync.cacheTasksFromRemote(tasks);
+        return tasks;
+      } catch (_) {
+        return _sync.getCachedTasks();
+      }
+    } else {
+      return _sync.getCachedTasks();
+    }
   }
 
   Future<void> addTask({
@@ -48,20 +65,34 @@ class TaskListNotifier extends AsyncNotifier<List<Task>> {
       'recurring': recurring.name,
     };
 
-    await _client.from('tasks').insert(json);
+    if (_isOnline) {
+      await _client.from('tasks').insert(json);
+    } else {
+      await _sync.enqueue('insert', json);
+    }
     ref.invalidateSelf();
   }
 
   Future<void> updateTask(Task task) async {
-    await _client
-        .from('tasks')
-        .update(task.toUpdateJson())
-        .eq('id', task.id);
+    final payload = task.toUpdateJson();
+    if (_isOnline) {
+      await _client
+          .from('tasks')
+          .update(payload)
+          .eq('id', task.id);
+    } else {
+      payload['id'] = task.id;
+      await _sync.enqueue('update', payload);
+    }
     ref.invalidateSelf();
   }
 
   Future<void> deleteTask(String taskId) async {
-    await _client.from('tasks').delete().eq('id', taskId);
+    if (_isOnline) {
+      await _client.from('tasks').delete().eq('id', taskId);
+    } else {
+      await _sync.enqueue('delete', {'id': taskId});
+    }
     ref.invalidateSelf();
   }
 }

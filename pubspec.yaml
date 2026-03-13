@@ -15,11 +15,20 @@ dependencies:
   go_router: ^15.1.2
   flutter_dotenv: ^5.2.1
   flutter_secure_storage: ^9.2.4
+  drift: ^2.25.0
+  drift_flutter: ^0.2.4
+  connectivity_plus: ^6.1.4
+  google_mobile_ads: ^5.3.0
+  url_launcher: ^6.3.1
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^6.0.0
+  flutter_launcher_icons: ^0.14.3
+  flutter_native_splash: ^2.4.5
+  drift_dev: ^2.25.0
+  build_runner: ^2.4.15
 
 flutter:
   uses-material-design: true

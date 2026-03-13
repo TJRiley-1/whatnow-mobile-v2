@@ -1,4 +1,4 @@
-package com.whattasknow.whattasknow_temp
+package com.whatnow.app
 
 import io.flutter.embedding.android.FlutterActivity
 

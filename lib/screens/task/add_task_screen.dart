@@ -23,6 +23,7 @@ class _AddTaskScreenState extends ConsumerState<AddTaskScreen> {
   int _time = 15;
   Level _social = Level.low;
   Level _energy = Level.low;
+  Recurring _recurring = Recurring.none;
   bool _isLoading = false;
 
   static const _timeOptions = [5, 10, 15, 30, 45, 60, 120];
@@ -62,6 +63,7 @@ class _AddTaskScreenState extends ConsumerState<AddTaskScreen> {
             time: _time,
             social: _social,
             energy: _energy,
+            recurring: _recurring,
           );
       if (mounted) context.pop();
     } catch (e) {
@@ -155,6 +157,23 @@ class _AddTaskScreenState extends ConsumerState<AddTaskScreen> {
                     .toList(),
                 selected: {_energy},
                 onSelectionChanged: (s) => setState(() => _energy = s.first),
+              ),
+
+              const SizedBox(height: 24),
+
+              // Recurring
+              Text('Recurring', style: theme.textTheme.titleMedium),
+              const SizedBox(height: 8),
+              Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                children: Recurring.values.map((r) {
+                  return ChoiceChip(
+                    label: Text(r.label),
+                    selected: r == _recurring,
+                    onSelected: (_) => setState(() => _recurring = r),
+                  );
+                }).toList(),
               ),
 
               const SizedBox(height: 24),

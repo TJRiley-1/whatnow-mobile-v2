@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../models/task.dart';
+import '../../providers/premium_provider.dart';
 import '../../providers/task_provider.dart';
+import '../../widgets/banner_ad_widget.dart';
 
 class TasksScreen extends ConsumerWidget {
   const TasksScreen({super.key});
@@ -10,66 +12,89 @@ class TasksScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final tasksAsync = ref.watch(taskListProvider);
+    final canAdd = ref.watch(canAddTaskProvider);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Tasks')),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () => context.push('/add-task'),
-        icon: const Icon(Icons.add),
-        label: const Text('Add Task'),
-      ),
-      body: tasksAsync.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (error, _) => Center(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text('Error loading tasks: $error'),
-              const SizedBox(height: 16),
-              ElevatedButton(
-                onPressed: () => ref.invalidate(taskListProvider),
-                child: const Text('Retry'),
-              ),
-            ],
+      appBar: AppBar(
+        title: const Text('Tasks'),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.upload_outlined),
+            tooltip: 'Import Tasks',
+            onPressed: () => context.push('/import-tasks'),
           ),
-        ),
-        data: (tasks) {
-          if (tasks.isEmpty) {
-            return Center(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(Icons.checklist,
-                      size: 64,
-                      color: Theme.of(context).colorScheme.outline),
-                  const SizedBox(height: 16),
-                  Text(
-                    'No tasks yet',
-                    style: Theme.of(context).textTheme.titleMedium,
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    'Tap + to add your first task',
-                    style: Theme.of(context).textTheme.bodyMedium,
-                  ),
-                ],
-              ),
-            );
+        ],
+      ),
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: () {
+          if (canAdd) {
+            context.push('/add-task');
+          } else {
+            context.push('/premium');
           }
+        },
+        icon: Icon(canAdd ? Icons.add : Icons.lock),
+        label: Text(canAdd ? 'Add Task' : 'Upgrade'),
+      ),
+      body: Column(
+        children: [
+          const BannerAdWidget(),
+          Expanded(
+            child: tasksAsync.when(
+              loading: () => const Center(child: CircularProgressIndicator()),
+              error: (error, _) => Center(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text('Error loading tasks: $error'),
+                    const SizedBox(height: 16),
+                    ElevatedButton(
+                      onPressed: () => ref.invalidate(taskListProvider),
+                      child: const Text('Retry'),
+                    ),
+                  ],
+                ),
+              ),
+              data: (tasks) {
+                if (tasks.isEmpty) {
+                  return Center(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(Icons.checklist,
+                            size: 64,
+                            color: Theme.of(context).colorScheme.outline),
+                        const SizedBox(height: 16),
+                        Text(
+                          'No tasks yet',
+                          style: Theme.of(context).textTheme.titleMedium,
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          'Tap + to add your first task',
+                          style: Theme.of(context).textTheme.bodyMedium,
+                        ),
+                      ],
+                    ),
+                  );
+                }
 
-          return RefreshIndicator(
-            onRefresh: () async => ref.invalidate(taskListProvider),
-            child: ListView.builder(
-              padding: const EdgeInsets.only(
-                  left: 16, right: 16, top: 8, bottom: 96),
-              itemCount: tasks.length,
-              itemBuilder: (context, index) {
-                final task = tasks[index];
-                return _TaskCard(task: task);
+                return RefreshIndicator(
+                  onRefresh: () async => ref.invalidate(taskListProvider),
+                  child: ListView.builder(
+                    padding: const EdgeInsets.only(
+                        left: 16, right: 16, top: 8, bottom: 96),
+                    itemCount: tasks.length,
+                    itemBuilder: (context, index) {
+                      final task = tasks[index];
+                      return _TaskCard(task: task);
+                    },
+                  ),
+                );
               },
             ),
-          );
-        },
+          ),
+        ],
       ),
     );
   }
@@ -132,17 +157,21 @@ class _TaskCard extends StatelessWidget {
                 ),
               ],
               const SizedBox(height: 8),
-              Row(
+              Wrap(
+                spacing: 8,
+                runSpacing: 4,
                 children: [
                   _Chip(icon: Icons.timer_outlined, label: timeLabel),
-                  const SizedBox(width: 8),
                   _Chip(
                       icon: Icons.people_outline,
                       label: 'Social: ${task.social.label}'),
-                  const SizedBox(width: 8),
                   _Chip(
                       icon: Icons.bolt_outlined,
                       label: 'Energy: ${task.energy.label}'),
+                  if (task.recurring != Recurring.none)
+                    _Chip(
+                        icon: Icons.repeat,
+                        label: task.recurring.label),
                 ],
               ),
             ],

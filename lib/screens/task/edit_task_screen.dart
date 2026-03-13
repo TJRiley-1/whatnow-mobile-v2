@@ -25,6 +25,7 @@ class _EditTaskScreenState extends ConsumerState<EditTaskScreen> {
   late int _time;
   late Level _social;
   late Level _energy;
+  late Recurring _recurring;
   bool _isLoading = false;
 
   static const _timeOptions = [5, 10, 15, 30, 45, 60, 120];
@@ -45,6 +46,7 @@ class _EditTaskScreenState extends ConsumerState<EditTaskScreen> {
     _time = widget.task.time;
     _social = widget.task.social;
     _energy = widget.task.energy;
+    _recurring = widget.task.recurring;
   }
 
   @override
@@ -85,7 +87,7 @@ class _EditTaskScreenState extends ConsumerState<EditTaskScreen> {
         social: _social,
         energy: _energy,
         dueDate: widget.task.dueDate,
-        recurring: widget.task.recurring,
+        recurring: _recurring,
         timesShown: widget.task.timesShown,
         timesSkipped: widget.task.timesSkipped,
         timesCompleted: widget.task.timesCompleted,
@@ -223,6 +225,22 @@ class _EditTaskScreenState extends ConsumerState<EditTaskScreen> {
                     .toList(),
                 selected: {_energy},
                 onSelectionChanged: (s) => setState(() => _energy = s.first),
+              ),
+
+              const SizedBox(height: 24),
+
+              Text('Recurring', style: theme.textTheme.titleMedium),
+              const SizedBox(height: 8),
+              Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                children: Recurring.values.map((r) {
+                  return ChoiceChip(
+                    label: Text(r.label),
+                    selected: r == _recurring,
+                    onSelected: (_) => setState(() => _recurring = r),
+                  );
+                }).toList(),
               ),
 
               const SizedBox(height: 24),

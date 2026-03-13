@@ -7,6 +7,7 @@ class Profile {
   final int totalTasksCompleted;
   final int totalTimeSpent;
   final String currentRank;
+  final bool isPremium;
   final DateTime createdAt;
   final DateTime updatedAt;
 
@@ -19,6 +20,7 @@ class Profile {
     this.totalTasksCompleted = 0,
     this.totalTimeSpent = 0,
     this.currentRank = 'Task Newbie',
+    this.isPremium = false,
     required this.createdAt,
     required this.updatedAt,
   });
@@ -33,6 +35,7 @@ class Profile {
       totalTasksCompleted: json['total_tasks_completed'] as int? ?? 0,
       totalTimeSpent: json['total_time_spent'] as int? ?? 0,
       currentRank: json['current_rank'] as String? ?? 'Task Newbie',
+      isPremium: json['is_premium'] as bool? ?? false,
       createdAt: DateTime.parse(json['created_at'] as String),
       updatedAt: DateTime.parse(json['updated_at'] as String),
     );
@@ -48,6 +51,7 @@ class Profile {
       'total_tasks_completed': totalTasksCompleted,
       'total_time_spent': totalTimeSpent,
       'current_rank': currentRank,
+      'is_premium': isPremium,
       'created_at': createdAt.toIso8601String(),
       'updated_at': updatedAt.toIso8601String(),
     };

@@ -11,10 +11,12 @@ import '../screens/home/profile_screen.dart';
 import '../screens/splash/splash_screen.dart';
 import '../screens/task/add_task_screen.dart';
 import '../screens/task/edit_task_screen.dart';
+import '../screens/task/import_tasks_screen.dart';
 import '../screens/timer/timer_screen.dart';
 import '../screens/celebration/celebration_screen.dart';
 import '../screens/groups/groups_screen.dart';
 import '../screens/groups/leaderboard_screen.dart';
+import '../screens/premium/premium_screen.dart';
 import '../models/task.dart';
 import '../models/group.dart';
 
@@ -57,6 +59,11 @@ GoRouter createRouter(AuthNotifier authNotifier) {
         builder: (context, state) => const AddTaskScreen(),
       ),
       GoRoute(
+        path: '/import-tasks',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) => const ImportTasksScreen(),
+      ),
+      GoRoute(
         path: '/edit-task',
         parentNavigatorKey: _rootNavigatorKey,
         builder: (context, state) => EditTaskScreen(task: state.extra! as Task),
@@ -82,6 +89,11 @@ GoRouter createRouter(AuthNotifier authNotifier) {
         path: '/groups',
         parentNavigatorKey: _rootNavigatorKey,
         builder: (context, state) => const GroupsScreen(),
+      ),
+      GoRoute(
+        path: '/premium',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) => const PremiumScreen(),
       ),
       GoRoute(
         path: '/leaderboard',

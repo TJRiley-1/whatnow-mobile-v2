@@ -162,6 +162,10 @@ class _SwipeCardState extends State<SwipeCard> {
                       _MetaChip(
                           icon: Icons.bolt_outlined,
                           label: task.energy.label),
+                      if (task.recurring != Recurring.none)
+                        _MetaChip(
+                            icon: Icons.repeat,
+                            label: task.recurring.label),
                     ],
                   ),
                   const SizedBox(height: 24),
