@@ -6,7 +6,7 @@ import '../../providers/premium_provider.dart';
 class PremiumScreen extends ConsumerWidget {
   const PremiumScreen({super.key});
 
-  static const _stripePaymentUrl = 'https://buy.stripe.com/test_placeholder';
+  static const _stripePaymentUrl = 'https://buy.stripe.com/test_aFacN754Iarx1Y07VKenS00';
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
