@@ -36,7 +36,95 @@ Whatnow is a task management app for people with ADHD and task paralysis. Users 
 4. **Verify** — Run `flutter analyze && flutter build apk --debug` after changes
 5. **Update CLAUDE.md** — As decisions are made, document them here for future sessions
 
+## Deep Research Findings (2026-03-15)
+
+### Market Intelligence
+- **Tiimo** (iPhone App of the Year 2025): visual timeline, AI co-planner, mood tracking — sets the bar for ADHD apps
+- **Finch**: micro-goals + compassionate mechanics (no punishing streaks) — models emotional design
+- **ADHD users have 40% higher app abandonment rates** — onboarding and first-session experience are make-or-break
+- **Hard paywalls outperform soft freemium** (78% vs 45% trial starts) — current 20-task soft limit may underperform
+- **Social features boost retention 40%**, engagement 35%, revenue 2.8x — groups feature is an asset
+- **Streaks + milestones reduce 30-day churn by 35%** — gamification is essential, not optional
+- **Simple single-tier pricing** reduces choice paralysis for ADHD users
+
+### Design Trends (2025-2026)
+- Glassmorphism / liquid glass effects
+- Earthy/refined green palettes (shifting away from pure purple)
+- Gesture-first navigation (swipe-heavy — aligns well with Whatnow's swipe UX)
+- Skeleton/shimmer loading screens (not spinners)
+- Micro-animations and haptic feedback for dopamine hits
+
+### Current App Gaps (by severity)
+
+**CRITICAL — blocks store acceptance or causes crashes**
+1. Zero widget/integration tests — store reviewers may reject; no regression safety net
+2. No App Tracking Transparency (ATT) — iOS will reject with AdMob
+3. No GDPR consent flow — legal requirement for UK/EU users
+4. No crash reporting — flying blind in production
+
+**HIGH — significantly hurts retention/conversion**
+5. No onboarding flow at all — users land in empty task list
+6. No notification/reminder system — ADHD users need external prompts
+7. No haptic feedback or micro-animations — missing dopamine reinforcement
+8. Timer progress lost on app kill — frustrating for core feature
+9. No skeleton/shimmer loading screens — feels broken on slow connections
+10. All strings hardcoded — no localisation possible
+11. No accessibility (font scaling, screen readers, contrast ratios)
+
+**MEDIUM — expected for quality apps**
+12. No deep linking / universal links
+13. No pagination (task list will degrade with many tasks)
+14. No autofocus on form fields
+15. No page transition animations
+16. No force-update mechanism for breaking changes
+17. No feature flags for gradual rollout
+
+### Store Keywords & ASO
+- **Primary (high intent):** ADHD planner, ADHD task manager, task paralysis, executive function, focus timer
+- **Secondary (broader reach):** to do list ADHD, daily planner, simple task manager, one task at a time, mindful productivity
+- **Long-tail (low competition):** task overwhelm help, ADHD friendly app, neurodivergent planner, decision fatigue app
+- **Avoid:** "productivity" (saturated), "todo list" (dominated by Todoist/TickTick), "habit tracker" (different category)
+- Apple keyword field (100 chars): `ADHD,planner,task paralysis,focus,timer,executive function,neurodivergent,simple,one task`
+- Google Play: include "ADHD" and "task" in title + short description
+- **Apple subtitle** (30 chars): "ADHD-Friendly Task Manager"
+
+### Streak & Widget Concepts
+
+**Compassionate streak mechanics (Finch-style):**
+- Daily streak: complete ≥1 task to maintain
+- Compassionate miss handling: "You missed yesterday — that's okay! Your streak is paused, not lost."
+- Freeze days: 2 free/month (premium gets unlimited)
+- Milestones: 7/30/100/365-day badges with celebration animations
+- Weekly summary: Sunday evening notification with task count and top category
+
+**Home screen widgets (`home_widget` package):**
+- "Next Task" widget — shows next recommended task with tap-to-complete
+- "Daily Streak" widget — flame icon + streak count
+- "Progress Ring" widget — circular progress for daily goal
+- Start with small (2×2) "Next Task" widget
+
+### Event Driven Groups (v2 Feature Concept)
+Evolve existing groups into collaborative task management for events, households, teams, friend groups.
+- **Core mechanics:** group task pool, task claiming ("I'll do this"), admin assignment, real-time status visibility
+- **Status flow:** Unclaimed → Claimed/Assigned → In Progress → Done
+- **Use cases:** party planning, household chores, team projects, ADHD accountability partners
+- **Technical scope:** new Supabase tables (group_tasks, group_members with roles), RLS, realtime subscriptions, invite system with deep links, push notifications
+- _Major feature — separate design phase required before implementation_
+
+### Price Localisation
+- Set GBP base price, use Apple/Google automatic localisation, manually review top 10 markets
+- Key markets: UK (home), US (largest English market), EU (GDPR territory), India/Brazil/SEA (high growth, low price sensitivity)
+- RevenueCat handles per-country pricing natively via App Store / Play Store price tiers
+
+---
+
 ## App Launch Checklist (Strategic Phase)
+
+### Testing & Quality (build confidence first)
+- [ ] Widget tests for core flows (add/edit/complete task, swipe card)
+- [ ] Integration tests with Patrol
+- [ ] Sentry crash reporting
+- [ ] CI/CD with GitHub Actions (analyze, test, build on every PR)
 
 ### Product Strategy (decide first)
 - [ ] Paywall model — what's free vs premium, pricing tiers
@@ -48,29 +136,71 @@ Whatnow is a task management app for people with ADHD and task paralysis. Users 
 - [ ] Paywall screen — placement, content, conversion design
 - [ ] In-app dashboard — user metrics, streaks, progress visualisation
 
+### Engagement & Retention (design alongside UX)
+- [ ] Push notifications (FCM + `flutter_local_notifications`) — task reminders, daily nudges, streak alerts
+- [ ] Haptic feedback + micro-animations — `HapticFeedback.lightImpact()` on swipe, confetti on completion
+- [ ] Streaks & milestones gamification — compassionate (Finch-style), not punitive
+- [ ] Shimmer loading screens — replace `CircularProgressIndicator` with shimmer placeholders
+- [ ] Timer state persistence — save to local storage, restore on app resume
+
+### Engagement Widgets
+- [ ] "Next Task" home screen widget (`home_widget` package)
+- [ ] "Daily Streak" home screen widget
+- [ ] Compassionate streak mechanics (pause, don't punish)
+- [ ] Streak freeze days (2 free/month, unlimited premium)
+- [ ] Milestone badges (7/30/100/365 days)
+- [ ] Weekly summary notification
+
+### Compliance
+- [ ] ATT for iOS (required for AdMob) — `app_tracking_transparency` package
+- [ ] GDPR consent management — consent banner on first launch, gate analytics/ads on consent
+- [ ] Health-adjacent disclaimers — ADHD is health-adjacent; may need store listing disclaimers
+
 ### Internationalisation
 - [ ] Languages to support at launch
 - [ ] Localisation implementation (Flutter intl/arb)
 - [ ] Store listing translations
+
+### Pricing & ASO
+- [ ] Price localisation — set GBP base price, configure per-country pricing, review top 10 markets
+- [ ] Store keyword optimisation — "ADHD planner", "task paralysis", "focus timer", "neurodivergent"
+- [ ] Apple subtitle: "ADHD-Friendly Task Manager" (30 chars)
 
 ### Brand & Design
 - [ ] App icon — professional design direction
 - [ ] Store screenshots — curated with marketing copy and device frames
 - [ ] Feature graphic (Android)
 
+### Accessibility
+- [ ] Screen reader / Semantics support — `Semantics` widgets, proper `labelText` on all inputs
+- [ ] Dynamic font scaling — test at 1.0x through 2.0x, ensure no overflow
+- [ ] WCAG AA contrast compliance
+
 ### Web Presence
 - [ ] whattasknow.com landing page
 - [ ] Privacy policy hosted on domain
 
 ### Infrastructure
-- [ ] Analytics platform (PostHog?)
+- [ ] Analytics platform (PostHog — analytics + feature flags + A/B in one platform)
 - [ ] AdMob real IDs
 - [ ] Release signing (keystore + iOS certs)
+- [ ] Flutter Flavors (dev/staging/prod environments with separate Supabase projects)
+- [ ] Force update mechanism — `force_update_helper` or remote config check
+- [ ] Feature flags — PostHog or Firebase Remote Config for gradual rollout
+- [ ] Deep linking — universal links (iOS) + app links (Android) for group invites, shared tasks
 
 ### Release (last)
 - [ ] Release builds (AAB + IPA)
 - [ ] Store submissions
 - [ ] Stripe test → live (or RevenueCat live)
+
+### Event Driven Groups (v2 — separate design phase)
+- [ ] Design: group task pool, claim/assign mechanics, status flow
+- [ ] Design: invite system (email, WhatsApp, SMS, deep link)
+- [ ] Design: real-time visibility (who has what, status updates)
+- [ ] Implementation: Supabase tables, RLS, realtime subscriptions
+- [ ] Implementation: push notifications for group activity
+- _Note: Major feature — separate design phase required before implementation_
 
 ## Key Decisions Log
 _Update this section as decisions are made_
@@ -80,3 +210,14 @@ _Update this section as decisions are made_
 | 2026-03-15 | Supabase for backend | Already in use, good free tier, auth + DB + edge functions |
 | 2026-03-15 | Stripe test mode set up | May be replaced by RevenueCat — Apple requires IAP for digital goods |
 | 2026-03-15 | 20-task free limit | Needs validation — discuss in paywall strategy |
+
+### Research-Backed Recommendations (2026-03-15)
+
+| Finding | Recommendation | Rationale |
+|---------|---------------|-----------|
+| Hard paywall > soft freemium | Consider 7-day free trial → paywall | 78% vs 45% trial starts; ADHD users need to experience value before deciding |
+| ADHD 40% higher abandonment | Prioritise onboarding above all else | First session must deliver a "wow" moment within 60 seconds |
+| Streaks reduce churn 35% | Add streak system before launch | Non-punishing (Finch-style) — compassionate messaging on missed days |
+| Social features 2.8x revenue | Leverage existing groups feature in marketing | Already built; highlight in store screenshots and onboarding |
+| Sentry is industry standard | Use Sentry over Firebase Crashlytics | Better Dart support, source maps, breadcrumb trails, generous free tier |
+| PostHog recommended | PostHog for analytics + feature flags + A/B | Single platform, open source, GDPR-friendly, replaces multiple tools |
