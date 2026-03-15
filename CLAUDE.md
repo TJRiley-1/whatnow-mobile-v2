@@ -28,6 +28,7 @@ Whatnow is a task management app for people with ADHD and task paralysis. Users 
 - **Colour:** Purple #6750A4
 - **Tagline:** "Stop overthinking. Start doing."
 - **Bundle ID:** com.whatnow.app
+- **IMPORTANT:** The swipe feature is called **"What Now?"** — never "What Next?". All UI text, class names, file names, and references must use "What Now?" / `WhatNow`.
 
 ## Working Process
 1. **Research first** — Every strategic decision gets researched with pros/cons before any code is written

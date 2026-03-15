@@ -35,7 +35,7 @@ class HomeShell extends ConsumerWidget {
           NavigationDestination(
             icon: Icon(Icons.shuffle),
             selectedIcon: Icon(Icons.shuffle),
-            label: 'What Next',
+            label: 'What Now',
           ),
           NavigationDestination(
             icon: Icon(Icons.checklist),

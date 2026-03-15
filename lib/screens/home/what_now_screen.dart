@@ -7,14 +7,14 @@ import '../../providers/task_provider.dart';
 import '../../widgets/banner_ad_widget.dart';
 import '../../widgets/swipe_card.dart';
 
-class WhatNextScreen extends ConsumerStatefulWidget {
-  const WhatNextScreen({super.key});
+class WhatNowScreen extends ConsumerStatefulWidget {
+  const WhatNowScreen({super.key});
 
   @override
-  ConsumerState<WhatNextScreen> createState() => _WhatNextScreenState();
+  ConsumerState<WhatNowScreen> createState() => _WhatNowScreenState();
 }
 
-class _WhatNextScreenState extends ConsumerState<WhatNextScreen> {
+class _WhatNowScreenState extends ConsumerState<WhatNowScreen> {
   int _currentIndex = 0;
   Task? _chosenTask;
 
@@ -82,7 +82,7 @@ class _WhatNextScreenState extends ConsumerState<WhatNextScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('What Next?'),
+        title: const Text('What Now?'),
         actions: [
           IconButton(
             icon: const Icon(Icons.tune),

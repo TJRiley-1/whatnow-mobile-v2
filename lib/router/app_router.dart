@@ -5,7 +5,7 @@ import '../providers/auth_provider.dart';
 import '../screens/auth/login_screen.dart';
 import '../screens/auth/signup_screen.dart';
 import '../screens/home/home_shell.dart';
-import '../screens/home/what_next_screen.dart';
+import '../screens/home/what_now_screen.dart';
 import '../screens/home/tasks_screen.dart';
 import '../screens/home/profile_screen.dart';
 import '../screens/splash/splash_screen.dart';
@@ -110,7 +110,7 @@ GoRouter createRouter(AuthNotifier authNotifier) {
             routes: [
               GoRoute(
                 path: '/',
-                builder: (context, state) => const WhatNextScreen(),
+                builder: (context, state) => const WhatNowScreen(),
               ),
             ],
           ),
